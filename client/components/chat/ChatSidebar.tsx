@@ -727,6 +727,10 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
                                       chatId: chat.id,
                                       chatTitle: chat.title
                                     });
+                                    // Auto-close sidebar on mobile when delete is clicked
+                                    if (isMobile && isMobileOpen) {
+                                      onMobileToggle();
+                                    }
                                   }}
                                   className="w-6 h-6 hover:bg-red-500/20 text-red-400 hover:text-red-300 transition-colors duration-200"
                                   aria-label={`Delete chat: ${chat.title}`}
