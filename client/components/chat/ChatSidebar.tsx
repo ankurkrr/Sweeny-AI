@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useChat } from '@/contexts/ChatContext';
 import { useSignOut, useUserData } from '@nhost/react';
 import { useMockAuth } from '@/lib/mock-auth-provider';
@@ -44,6 +44,7 @@ interface ChatSidebarProps {
   isSidebarOpen: boolean;
   onSidebarToggle: () => void;
   isMobile: boolean;
+  onCancelSelection?: () => void;
 }
 
 export const ChatSidebar: React.FC<ChatSidebarProps> = ({
@@ -51,7 +52,8 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
   onMobileToggle,
   isSidebarOpen,
   onSidebarToggle,
-  isMobile
+  isMobile,
+  onCancelSelection
 }) => {
   const { chats, activeChat, createNewChat, setActiveChat, deleteChat, renameChat } = useChat();
   const { signOut } = useSignOut();
@@ -98,7 +100,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
 
   // Close profile menu on outside click
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
       if (
         profileMenuRef.current &&
         profileButtonRef.current &&
@@ -111,24 +113,32 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
 
     if (isProfileMenuOpen) {
       document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+        document.removeEventListener('touchstart', handleClickOutside);
+      };
     }
   }, [isProfileMenuOpen]);
 
-  // Close profile menu on escape key
+  // Close profile menu on escape key and handle selection mode escape
   useEffect(() => {
     const handleEscKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && isProfileMenuOpen) {
-        setIsProfileMenuOpen(false);
-        profileButtonRef.current?.focus();
+      if (event.key === 'Escape') {
+        if (isProfileMenuOpen) {
+          setIsProfileMenuOpen(false);
+          profileButtonRef.current?.focus();
+        } else if (isSelectAllMode) {
+          cancelSelection();
+        }
       }
     };
 
-    if (isProfileMenuOpen) {
+    if (isProfileMenuOpen || isSelectAllMode) {
       document.addEventListener('keydown', handleEscKey);
       return () => document.removeEventListener('keydown', handleEscKey);
     }
-  }, [isProfileMenuOpen]);
+  }, [isProfileMenuOpen, isSelectAllMode]);
 
   // Touch gesture handlers for mobile sidebar
   useEffect(() => {
@@ -297,6 +307,23 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
     }
     setIsProfileMenuOpen(false);
   };
+
+  const cancelSelection = () => {
+    setSelectedChats(new Set());
+    setIsSelectAllMode(false);
+  };
+
+  // Expose cancel selection function to parent
+  React.useEffect(() => {
+    if (onCancelSelection) {
+      window.cancelChatSelection = cancelSelection;
+    }
+    return () => {
+      if (window.cancelChatSelection) {
+        delete window.cancelChatSelection;
+      }
+    };
+  }, [onCancelSelection]);
 
   const toggleChatSelection = (chatId: string) => {
     setSelectedChats(prev => {
@@ -481,25 +508,41 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
                     Delete ({selectedChats.size})
                   </Button>
                   <Button
-                    onClick={() => {
-                      setSelectedChats(new Set());
-                      setIsSelectAllMode(false);
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      cancelSelection();
                     }}
-                    className="px-3 py-3 rounded-lg text-sm font-normal transition-colors duration-200"
+                    onTouchStart={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
+                    onTouchEnd={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      cancelSelection();
+                    }}
+                    className={cn(
+                      "touch-target-lg flex items-center justify-center rounded-lg text-sm font-normal transition-all duration-200 mobile-button-feedback",
+                      isMobile && "mobile-cancel-button"
+                    )}
                     style={{
                       backgroundColor: 'transparent',
                       border: '1px solid rgba(255, 255, 255, 0.2)',
                       color: '#FFFFFF',
-                      fontFamily: 'Inter, sans-serif'
+                      fontFamily: 'Inter, sans-serif',
+                      minWidth: isMobile ? '48px' : '36px',
+                      minHeight: isMobile ? '48px' : '36px',
+                      padding: isMobile ? '12px' : '8px'
                     }}
                     aria-label="Cancel selection"
                   >
-                    <X className="w-4 h-4" />
+                    <X className={cn("transition-transform duration-200", isMobile ? "w-5 h-5" : "w-4 h-4")} />
                   </Button>
                 </div>
               ) : (
                 <Button
-                  onClick={createNewChat}
+                  onClick={() => createNewChat()}
                   className="w-full flex items-center justify-start gap-3 px-3 py-3 rounded-lg text-sm font-normal transition-colors duration-200"
                   style={{
                     backgroundColor: 'transparent',
@@ -519,7 +562,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
           {/* Collapsed New Chat Button */}
           {!isMobile && !isSidebarOpen && (
             <Button
-              onClick={createNewChat}
+              onClick={() => createNewChat()}
               className="w-full flex items-center justify-center p-3 rounded-lg text-sm font-normal transition-colors duration-200"
               style={{
                 backgroundColor: 'transparent',
@@ -532,8 +575,8 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
             </Button>
           )}
 
-          {/* Mobile close button */}
-          {isMobile && (
+          {/* Mobile close button - hidden during selection mode */}
+          {isMobile && !isSelectAllMode && (
             <Button
               variant="ghost"
               size="icon"

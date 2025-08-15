@@ -59,22 +59,22 @@ export const ChatInput: React.FC = () => {
   const isDisabled = !message.trim() || isComposing || isSending;
 
   return (
-    <div className="p-4" style={{ backgroundColor: '#202123' }}>
+    <div className="p-4 pb-4 pt-2" style={{ backgroundColor: '#202123' }}>
       <div className="max-w-3xl mx-auto">
         <form onSubmit={handleSubmit}>
           <div className="relative">
             {/* Main Input Container with 999px border radius */}
-            <div 
+            <div
               className={cn(
                 "relative flex items-end border transition-all duration-200",
                 "focus-within:shadow-lg",
                 isSending && "opacity-50"
               )}
-              style={{ 
+              style={{
                 backgroundColor: '#2A2B32',
                 borderColor: 'rgba(255, 255, 255, 0.1)',
                 borderRadius: '999px',
-                padding: '12px 16px'
+                padding: '10px 14px'
               }}
             >
               {/* Attach Button */}
@@ -138,12 +138,12 @@ export const ChatInput: React.FC = () => {
         </form>
         
         {/* Footer Text */}
-        <div className="mt-2 text-center">
+        <div className="mt-1 text-center">
           <p
             className="text-xs"
             style={{
               color: '#9CA3AF',
-              fontSize: '12px'
+              fontSize: '11px'
             }}
           >
             Sweeny can make mistakes. Check important info.
