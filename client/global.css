@@ -701,6 +701,30 @@ body {
     @apply shadow-md;
   }
 
+  /* Scroll isolation for chat layout */
+  .chat-layout-container {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .chat-sidebar-container {
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+  }
+
+  .chat-window-container {
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+  }
+
+  /* Prevent scroll propagation between sidebar and chat window */
+  .chat-sidebar-container .scroll-area-viewport,
+  .chat-window-container .scroll-area-viewport {
+    overscroll-behavior: contain;
+  }
+
   /* Mobile optimizations */
   @media (max-width: 768px) {
     .chat-bubble {

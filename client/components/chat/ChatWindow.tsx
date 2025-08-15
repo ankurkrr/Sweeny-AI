@@ -33,7 +33,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
 
   if (!activeChat) {
     return (
-      <div className="flex-1 flex flex-col" style={{ backgroundColor: '#202123' }}>
+      <div className="flex-1 flex flex-col h-full overflow-hidden chat-window-container" style={{ backgroundColor: '#202123' }}>
         {/* Mobile Header */}
         {isMobile && (
           <div className="flex items-center justify-between p-4 border-b border-white/10">
@@ -134,7 +134,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   }
 
   return (
-    <div className="flex-1 flex flex-col" style={{ backgroundColor: '#202123' }}>
+    <div className="flex-1 flex flex-col h-full overflow-hidden chat-window-container" style={{ backgroundColor: '#202123' }}>
       {/* Mobile Header */}
       {isMobile && (
         <div className="flex items-center justify-between p-4 border-b border-white/10">
@@ -161,7 +161,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
       )}
 
       {/* Messages */}
-      <ScrollArea className="flex-1">
+      <ScrollArea className="flex-1 min-h-0">
         <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
           {activeChat?.messages.map((message) => (
             <Message key={message.id} message={message} />

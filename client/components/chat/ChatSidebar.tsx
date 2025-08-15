@@ -411,7 +411,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
       <div
         ref={sidebarRef}
         className={cn(
-          "flex flex-col shadow-xl",
+          "flex flex-col shadow-xl h-full overflow-hidden chat-sidebar-container",
           isMobile ? (
             cn(
               "fixed top-0 left-0 z-50",
@@ -499,7 +499,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
                 </div>
               ) : (
                 <Button
-                  onClick={createNewChat}
+                  onClick={() => createNewChat()}
                   className="w-full flex items-center justify-start gap-3 px-3 py-3 rounded-lg text-sm font-normal transition-colors duration-200"
                   style={{
                     backgroundColor: 'transparent',
@@ -519,7 +519,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
           {/* Collapsed New Chat Button */}
           {!isMobile && !isSidebarOpen && (
             <Button
-              onClick={createNewChat}
+              onClick={() => createNewChat()}
               className="w-full flex items-center justify-center p-3 rounded-lg text-sm font-normal transition-colors duration-200"
               style={{
                 backgroundColor: 'transparent',
@@ -574,7 +574,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
         )}
 
         {/* Chat List */}
-        <ScrollArea className="flex-1 px-3 py-3">
+        <ScrollArea className="flex-1 px-3 py-3 min-h-0">
           <div className="space-y-1">
             {filteredChats.length === 0 ? (
               (isMobile || isSidebarOpen) && (
