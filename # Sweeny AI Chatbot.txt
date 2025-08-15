@@ -1,0 +1,34 @@
+# Sweeny AI Chatbot
+
+Sweeny AI is a real-time chatbot application powered by **Hasura GraphQL**, **n8n workflows**, and **OpenRouter AI**. It allows users to create chats, send messages, and receive AI-generated responses in real-time. The project is deployed on **Netlify** and uses **Nhost** for authentication and database management.
+
+## Live Demo
+You can access the live application here:  
+[https://sweenyai.netlify.app/](https://sweenyai.netlify.app/)
+
+---
+
+## Features
+- **Authentication**: Email-based sign-up and sign-in using Nhost Auth.
+- **Real-Time Updates**: Chat and message updates using GraphQL subscriptions.
+- **AI-Powered Responses**: Messages are processed via n8n workflows and OpenRouter AI.
+- **Secure Backend**: Row-Level Security (RLS) ensures users can only access their own data.
+- **Modern UI**: Built with React and Apollo Client for a seamless user experience.
+
+---
+
+## Technologies Used
+### Frontend
+- **React**: For building the user interface.
+- **Apollo Client**: For GraphQL queries, mutations, and subscriptions.
+- **Nhost React SDK**: For authentication and backend integration.
+- **Netlify**: For deployment.
+
+### Backend
+- **Hasura**: For GraphQL API and database management.
+- **n8n**: For workflow automation and integration with OpenRouter AI.
+- **OpenRouter AI**: For generating AI responses.
+
+---
+
+## Project Structure

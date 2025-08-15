@@ -731,34 +731,6 @@ body {
     }
   }
 
-  /* Enhanced mobile touch targets */
-  .touch-target-lg {
-    @apply min-h-[48px] min-w-[48px] transition-all duration-200;
-  }
-
-  .touch-target-lg:active {
-    @apply scale-95;
-  }
-
-  /* Mobile-specific button feedback */
-  @media (max-width: 768px) {
-    .mobile-button-feedback:active {
-      @apply scale-95 bg-white/10;
-      transform: scale(0.95);
-    }
-
-    .mobile-cancel-button {
-      min-width: 48px;
-      min-height: 48px;
-      padding: 12px;
-    }
-
-    .mobile-cancel-button:active {
-      background-color: rgba(255, 255, 255, 0.1) !important;
-      transform: scale(0.95);
-    }
-  }
-
   /* High contrast mode support */
   @media (prefers-contrast: high) {
     .btn-primary-hover {

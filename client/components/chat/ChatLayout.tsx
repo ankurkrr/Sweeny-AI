@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { ChatProvider } from '@/contexts/ChatContext';
 import { ChatSidebar } from './ChatSidebar';
 import { ChatWindow } from './ChatWindow';
@@ -7,7 +7,6 @@ export const ChatLayout: React.FC = () => {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
-  const chatWindowRef = useRef<HTMLDivElement>(null);
 
   // Check if screen is mobile
   useEffect(() => {
@@ -32,13 +31,6 @@ export const ChatLayout: React.FC = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  const handleChatWindowClick = () => {
-    // Cancel selection mode when clicking on chat window
-    if (typeof window !== 'undefined' && window.cancelChatSelection) {
-      window.cancelChatSelection();
-    }
-  };
-
   return (
     <ChatProvider>
       <div className="flex h-screen" style={{ backgroundColor: '#202123' }}>
@@ -48,21 +40,13 @@ export const ChatLayout: React.FC = () => {
           isSidebarOpen={isSidebarOpen}
           onSidebarToggle={toggleSidebar}
           isMobile={isMobile}
-          onCancelSelection={handleChatWindowClick}
         />
-        <div
-          ref={chatWindowRef}
-          onClick={handleChatWindowClick}
-          onTouchEnd={handleChatWindowClick}
-          className="flex-1"
-        >
-          <ChatWindow
-            onMobileMenuToggle={toggleMobileSidebar}
-            onSidebarToggle={toggleSidebar}
-            isSidebarOpen={isSidebarOpen}
-            isMobile={isMobile}
-          />
-        </div>
+        <ChatWindow
+          onMobileMenuToggle={toggleMobileSidebar}
+          onSidebarToggle={toggleSidebar}
+          isSidebarOpen={isSidebarOpen}
+          isMobile={isMobile}
+        />
       </div>
     </ChatProvider>
   );
