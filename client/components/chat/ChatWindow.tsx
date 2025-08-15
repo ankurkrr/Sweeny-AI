@@ -44,7 +44,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
               className="hover:bg-gray-700 text-white transition-colors duration-200"
               aria-label="Open sidebar menu"
             >
-              <Menu className="w-5 h-5" />
+              <Menu className="w-4 h-4" />
             </Button>
             <h1
               className="text-lg font-semibold"
@@ -145,7 +145,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
             className="hover:bg-gray-700 text-white transition-colors duration-200"
             aria-label="Open sidebar menu"
           >
-            <Menu className="w-5 h-5" />
+            <Menu className="w-4 h-4" />
           </Button>
           <h1
             className="text-lg font-semibold truncate"

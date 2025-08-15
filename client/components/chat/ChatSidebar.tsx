@@ -451,7 +451,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
                 tabIndex={0}
                 style={{ fontFamily: 'Inter, sans-serif' }}
               >
-                <Menu className="w-5 h-5" />
+                <Menu className="w-4 h-4" />
               </button>
               {isSidebarOpen && (
                 <div className="text-lg font-semibold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
@@ -811,6 +811,19 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
                   >
                     {((MOCK_ENABLED && mockAuth.user) ? mockAuth.user : user)?.displayName || 'User'}
                   </p>
+                  {((MOCK_ENABLED && mockAuth.user) ? mockAuth.user : user)?.email && (
+                    <p
+                      className="text-xs truncate transition-colors duration-200"
+                      style={{
+                        color: '#9CA3AF',
+                        fontSize: '12px',
+                        fontFamily: 'Inter, sans-serif',
+                        lineHeight: '1.2'
+                      }}
+                    >
+                      {((MOCK_ENABLED && mockAuth.user) ? mockAuth.user : user)?.email}
+                    </p>
+                  )}
                 </div>
               </button>
             </div>

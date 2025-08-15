@@ -223,7 +223,7 @@ body {
    * A different format will require also updating the theme in tailwind.config.ts.
   */
   :root {
-    /* ChatGPT Color Scheme */
+    /* Sweeny AI Color Scheme */
     --background: 210 10% 12%; /* #202123 */
     --foreground: 0 0% 100%; /* #FFFFFF */
 
@@ -263,7 +263,7 @@ body {
     --sidebar-border: 213 10% 25%; /* #3A3B40 Hover */
     --sidebar-ring: 259 94% 51%; /* #8B5CF6 Purple */;
 
-    /* ChatGPT specific colors */
+    /* Sweeny AI specific colors */
     --main-bg: 210 10% 12%; /* #202123 Main background */
     --sidebar-bg: 212 7% 22%; /* #343541 Sidebar background */
     --input-bg: 216 7% 18%; /* #2A2B32 Input bar background */
@@ -380,7 +380,7 @@ body {
     letter-spacing: -0.01em;
   }
 
-  /* ChatGPT Typography Scale */
+  /* Sweeny AI Typography Scale */
   .text-xs { font-size: 0.75rem; line-height: 1rem; }
   .text-sm { font-size: 0.875rem; line-height: 1.25rem; } /* 14px subtext */
   .text-base { font-size: 1rem; line-height: 1.5rem; } /* 16px chat text */
@@ -456,15 +456,15 @@ body {
     animation: fadeIn 0.15s ease-out;
   }
 
-  /* ChatGPT style dropdown */
-  .chatgpt-dropdown {
+  /* Sweeny AI style dropdown */
+  .Sweeny AI-dropdown {
     background-color: #2A2B32 !important;
     border: 1px solid rgba(255, 255, 255, 0.1) !important;
     border-radius: 8px !important;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
   }
 
-  .chatgpt-dropdown-item {
+  .Sweeny AI-dropdown-item {
     color: #FFFFFF !important;
     font-size: 14px !important;
     padding: 8px 12px !important;
@@ -472,7 +472,7 @@ body {
     margin: 2px !important;
   }
 
-  .chatgpt-dropdown-item:hover {
+  .Sweeny AI-dropdown-item:hover {
     background-color: rgba(255, 255, 255, 0.1) !important;
   }
 
