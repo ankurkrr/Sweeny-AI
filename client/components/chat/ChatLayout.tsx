@@ -33,7 +33,7 @@ export const ChatLayout: React.FC = () => {
 
   return (
     <ChatProvider>
-      <div className="flex h-screen overflow-hidden chat-layout-container" style={{ backgroundColor: '#202123' }}>
+      <div className="flex h-[100dvh] overflow-hidden chat-layout-container" style={{ backgroundColor: '#202123' }}>
         <ChatSidebar
           isMobileOpen={isMobileSidebarOpen}
           onMobileToggle={toggleMobileSidebar}

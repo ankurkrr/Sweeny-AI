@@ -161,7 +161,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
       )}
 
       {/* Messages */}
-      <ScrollArea className="flex-1 min-h-0">
+      <ScrollArea className="flex-1 min-h-0 chat-messages-scroll">
         <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
           {activeChat?.messages.map((message) => (
             <Message key={message.id} message={message} />

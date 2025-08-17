@@ -59,7 +59,13 @@ export const ChatInput: React.FC = () => {
   const isDisabled = !message.trim() || isComposing || isSending;
 
   return (
-    <div className="p-4 pb-4 pt-2" style={{ backgroundColor: '#202123' }}>
+    <div
+      className="p-4 pt-2 chat-input-container"
+      style={{
+        backgroundColor: '#202123',
+        paddingBottom: 'max(16px, env(safe-area-inset-bottom))'
+      }}
+    >
       <div className="max-w-3xl mx-auto">
         <form onSubmit={handleSubmit}>
           <div className="relative">

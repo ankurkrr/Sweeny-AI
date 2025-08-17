@@ -725,6 +725,25 @@ body {
     overscroll-behavior: contain;
   }
 
+  /* Mobile viewport and input fixes */
+  .chat-layout-container {
+    height: 100vh; /* Fallback for browsers without dvh support */
+    height: 100dvh; /* Use dynamic viewport height for mobile */
+  }
+
+  /* For browsers that support dvh, ensure it's always used */
+  @supports (height: 100dvh) {
+    .chat-layout-container {
+      height: 100dvh !important;
+    }
+  }
+
+  .chat-input-container {
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+  }
+
   /* Mobile optimizations */
   @media (max-width: 768px) {
     .chat-bubble {
@@ -741,6 +760,46 @@ body {
 
     .input-mobile {
       @apply text-base; /* Prevents zoom on iOS */
+    }
+
+    /* Ensure proper mobile viewport handling */
+    .chat-layout-container {
+      height: 100dvh !important;
+      min-height: 100dvh;
+    }
+
+    /* Fix input positioning on mobile */
+    .chat-input-container {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 20;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Add padding to the chat window to account for fixed input */
+    .chat-window-container {
+      padding-bottom: env(safe-area-inset-bottom, 0);
+    }
+
+    /* Adjust scroll area to account for fixed input */
+    .chat-messages-scroll {
+      padding-bottom: 140px; /* Account for input height + safe area */
+    }
+
+    /* Ensure proper viewport behavior when keyboard appears */
+    .chat-layout-container {
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Handle iOS Safari keyboard behavior */
+    @supports (-webkit-touch-callout: none) {
+      .chat-input-container {
+        position: fixed;
+        bottom: env(keyboard-inset-height, env(safe-area-inset-bottom, 0));
+      }
     }
   }
 
