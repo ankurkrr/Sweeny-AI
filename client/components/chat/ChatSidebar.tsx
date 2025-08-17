@@ -556,7 +556,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
                 placeholder="Search chats"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 text-sm border-none focus:ring-0 transition-colors duration-200"
+                className="pl-10 pr-10 text-sm border-none focus:ring-0 transition-colors duration-200"
                 style={{
                   backgroundColor: '#343541',
                   color: '#D1D5DB',
@@ -565,6 +565,17 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
                 }}
                 aria-label="Search chats"
               />
+              {searchQuery && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-1 top-1/2 transform -translate-y-1/2 p-1 h-8 w-8 hover:bg-white/10 transition-colors duration-200"
+                  aria-label="Clear search"
+                >
+                  <X className="w-4 h-4" style={{ color: '#9CA3AF' }} />
+                </Button>
+              )}
             </div>
           </div>
         )}
@@ -718,26 +729,29 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
                                 >
                                   <Edit2 className="w-3 h-3" />
                                 </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setDeleteChatModal({
-                                      isOpen: true,
-                                      chatId: chat.id,
-                                      chatTitle: chat.title
-                                    });
-                                    // Auto-close sidebar on mobile when delete is clicked
-                                    if (isMobile && isMobileOpen) {
-                                      onMobileToggle();
-                                    }
-                                  }}
-                                  className="w-6 h-6 hover:bg-red-500/20 text-red-400 hover:text-red-300 transition-colors duration-200"
-                                  aria-label={`Delete chat: ${chat.title}`}
-                                >
-                                  <Trash2 className="w-3 h-3" />
-                                </Button>
+                                {/* Only show delete button for chats that have messages */}
+                                {(chat.messages.length > 0 || (chat.messageCount !== undefined && chat.messageCount > 0)) && (
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setDeleteChatModal({
+                                        isOpen: true,
+                                        chatId: chat.id,
+                                        chatTitle: chat.title
+                                      });
+                                      // Auto-close sidebar on mobile when delete is clicked
+                                      if (isMobile && isMobileOpen) {
+                                        onMobileToggle();
+                                      }
+                                    }}
+                                    className="w-6 h-6 hover:bg-red-500/20 text-red-400 hover:text-red-300 transition-colors duration-200"
+                                    aria-label={`Delete chat: ${chat.title}`}
+                                  >
+                                    <Trash2 className="w-3 h-3" />
+                                  </Button>
+                                )}
                               </>
                             )}
                           </div>
