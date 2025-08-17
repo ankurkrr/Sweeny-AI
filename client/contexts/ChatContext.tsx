@@ -150,6 +150,12 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [user]);
 
   const setActiveChat = useCallback(async (chatId: string) => {
+    // Close keyboard when switching chats
+    const activeElement = document.activeElement as HTMLElement;
+    if (activeElement && activeElement.blur) {
+      activeElement.blur();
+    }
+
     // Cleanup empty chats when switching away from current chat
     if (activeChat && chats.length > 1) {
       // Use setTimeout to allow the cleanup to happen asynchronously with silent mode
@@ -460,6 +466,12 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [activeChat]);
 
   const clearActiveChat = useCallback(() => {
+    // Close keyboard when navigating to dashboard
+    const activeElement = document.activeElement as HTMLElement;
+    if (activeElement && activeElement.blur) {
+      activeElement.blur();
+    }
+
     setActiveChatState(null);
   }, []);
 

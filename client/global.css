@@ -941,4 +941,46 @@ body {
     background-clip: text;
     -webkit-text-fill-color: transparent;
   }
+
+  /* Chat input keyboard handling */
+  .chat-input-container {
+    transition: all 0.3s ease-in-out;
+  }
+
+  /* Keyboard active state styling */
+  .chat-input-container.keyboard-active {
+    transform: translateY(0);
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Improved mobile keyboard handling */
+  @media (max-width: 768px) {
+    /* Override mobile input positioning when keyboard is active */
+    .chat-input-container.keyboard-active {
+      position: fixed !important;
+      bottom: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      z-index: 1000 !important;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      background: #202123;
+    }
+
+    /* Adjust chat window when keyboard is open */
+    .chat-window-container:has(.keyboard-active) {
+      padding-bottom: 120px;
+    }
+
+    /* Default mobile input positioning */
+    .chat-input-container:not(.keyboard-active) {
+      position: sticky;
+      bottom: 0;
+      z-index: 20;
+    }
+
+    /* Adjust messages scroll when keyboard is active */
+    .chat-window-container:has(.keyboard-active) .chat-messages-scroll {
+      padding-bottom: 140px;
+    }
+  }
 }

@@ -4,7 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Send, Loader2, Paperclip } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-export const ChatInput: React.FC = () => {
+interface ChatInputProps {
+  isKeyboardOpen?: boolean;
+}
+
+export const ChatInput: React.FC<ChatInputProps> = ({ isKeyboardOpen = false }) => {
   const [message, setMessage] = useState('');
   const [isComposing, setIsComposing] = useState(false);
   const [isSending, setIsSending] = useState(false);
@@ -90,10 +94,21 @@ export const ChatInput: React.FC = () => {
 
   return (
     <div
-      className="p-4 pt-2 chat-input-container"
+      className={cn(
+        "p-4 pt-2 chat-input-container transition-all duration-300",
+        isKeyboardOpen && "keyboard-active"
+      )}
       style={{
         backgroundColor: '#202123',
-        paddingBottom: 'max(16px, env(safe-area-inset-bottom))'
+        paddingBottom: isKeyboardOpen
+          ? 'max(8px, env(safe-area-inset-bottom))'
+          : 'max(16px, env(safe-area-inset-bottom))',
+        position: isKeyboardOpen ? 'fixed' : 'sticky',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        zIndex: isKeyboardOpen ? 1000 : 'auto',
+        borderTop: isKeyboardOpen ? '1px solid rgba(255, 255, 255, 0.1)' : 'none'
       }}
     >
       <div className="max-w-3xl mx-auto">

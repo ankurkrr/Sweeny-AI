@@ -13,13 +13,17 @@ interface ChatWindowProps {
   onSidebarToggle: () => void;
   isSidebarOpen: boolean;
   isMobile: boolean;
+  isKeyboardOpen: boolean;
+  closeKeyboard: () => void;
 }
 
 export const ChatWindow: React.FC<ChatWindowProps> = ({
   onMobileMenuToggle,
   onSidebarToggle,
   isSidebarOpen,
-  isMobile
+  isMobile,
+  isKeyboardOpen,
+  closeKeyboard
 }) => {
   const { activeChat, isTyping } = useChat();
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -64,7 +68,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         <TypingAnimation isMobile={isMobile} />
 
         {/* Input Area */}
-        <ChatInput />
+        <ChatInput isKeyboardOpen={isKeyboardOpen} />
       </div>
     );
   }
@@ -108,7 +112,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
       </ScrollArea>
 
       {/* Input Area */}
-      <ChatInput />
+      <ChatInput isKeyboardOpen={isKeyboardOpen} />
     </div>
   );
 };

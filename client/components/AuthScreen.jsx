@@ -32,6 +32,7 @@ export default function AuthScreen({ mode }) {
   const [retryCount, setRetryCount] = useState(0);
     const [signupSuccess, setSignupSuccess] = useState(!!location.state?.message);
     const [successMessage, setSuccessMessage] = useState(location.state?.message || '');
+    const [showVerificationMessage, setShowVerificationMessage] = useState(false);
 
   const isAuthenticated = useAuthenticated();
   const { isLoading: authStatusLoading } = useAuthenticationStatus();
@@ -170,60 +171,28 @@ export default function AuthScreen({ mode }) {
           throw signUpResult.error;
         }
 
-        // Account created successfully, now try auto-login
+        // Account created successfully - show verification message
         setIsSigningUp(false);
-        setIsAutoLogging(true);
+        setShowVerificationMessage(true);
+        setIsSignUp(false); // Switch to sign in mode
 
-        try {
-          let signInResult;
+        // Clear form fields except email
+        setConfirmPassword('');
+        setFirstName('');
+        setLastName('');
+        setPassword('');
+        setErrors({});
+        setAuthError('');
 
-          try {
-            signInResult = await nhost.auth.signIn({ email, password });
-          } catch (nhostError) {
-            console.log('Nhost auto-signin failed:', nhostError);
-            // Use mock auth when nHost fails in development
-            if (MOCK_ENABLED) {
-              try {
-                signInResult = await mockAuth.signIn(email, password);
-              } catch (mockError) {
-                console.error('Mock auto-signin also failed:', mockError);
-                throw mockError;
-              }
-            } else {
-              throw nhostError;
-            }
-          }
+        toast.success('Account created! Please check your email for verification.', {
+          icon: <CheckCircle className="w-4 h-4" />,
+          duration: 5000,
+        });
 
-          if (signInResult.error) {
-            throw signInResult.error;
-          }
-          if (signInResult.session) {
-            // Auto-signin succeeded - user goes directly to dashboard
-            toast.success('Account created and signed in! Redirecting to dashboard...', {
-              icon: <CheckCircle className="w-4 h-4" />,
-              duration: 3000,
-            });
-            // No further action needed, user will be redirected by auth state
-          }
-        } catch (signInError) {
-          // Auto-signin failed - show success message and keep email filled
-          setSignupSuccess(true);
-          setSuccessMessage('Account created successfully! Please sign in below.');
-          setConfirmPassword('');
-          setFirstName('');
-          setLastName('');
-          setErrors({});
-          setAuthError('');
-          setPassword('');
-          setIsSignUp(false);
-          toast.success('Account created! Please sign in below.', {
-            icon: <CheckCircle className="w-4 h-4" />,
-            duration: 4000,
-          });
-        } finally {
-          setIsAutoLogging(false);
-          setIsProcessing(false);
-        }
+        return; // Don't proceed to auto-login, wait for email verification
+
+        // Auto-login code removed - now showing verification message instead
+        setIsProcessing(false);
       } else {
         // Regular sign in
         let result;
@@ -354,6 +323,7 @@ export default function AuthScreen({ mode }) {
     setAuthError('');
     setSignupSuccess(false);
     setSuccessMessage('');
+    setShowVerificationMessage(false);
     setRetryCount(0); // Reset retry count
     // Navigation will be handled by route state updates
     window.history.pushState({}, '', !isSignUp ? '/signup' : '/signin');
@@ -454,6 +424,23 @@ export default function AuthScreen({ mode }) {
                 <Loader2 className="w-4 h-4 text-blue-400 animate-spin" />
                 <AlertDescription>
                   Account created! Signing you in...
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {/* Show email verification message after signup */}
+            {showVerificationMessage && !isSignUp && (
+              <Alert className="bg-blue-900/80 border-blue-500/30 text-blue-200">
+                <CheckCircle className="w-4 h-4 text-blue-400" />
+                <AlertDescription>
+                  <div className="space-y-2">
+                    <strong>Account created successfully!</strong>
+                    <p>We've sent a verification email to <strong>{email}</strong></p>
+                    <p>Please check your email and click the verification link to activate your account.</p>
+                    <p className="text-xs text-blue-300 mt-2">
+                      Don't see the email? Check your spam/junk folder.
+                    </p>
+                  </div>
                 </AlertDescription>
               </Alert>
             )}

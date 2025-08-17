@@ -501,6 +501,12 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
               ) : (
                 <Button
                   onClick={() => {
+                    // Close keyboard when navigating to dashboard
+                    const activeElement = document.activeElement as HTMLElement;
+                    if (activeElement && activeElement.blur) {
+                      activeElement.blur();
+                    }
+
                     // Clear active chat to show dashboard landing page
                     clearActiveChat();
                     // Close sidebar on mobile and desktop
@@ -529,6 +535,12 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
           {!isMobile && !isSidebarOpen && (
             <Button
               onClick={() => {
+                // Close keyboard when navigating to dashboard
+                const activeElement = document.activeElement as HTMLElement;
+                if (activeElement && activeElement.blur) {
+                  activeElement.blur();
+                }
+
                 // Clear active chat to show dashboard landing page
                 clearActiveChat();
               }}
@@ -625,6 +637,12 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
                     if (isSelectAllMode) {
                       toggleChatSelection(chat.id);
                     } else {
+                      // Close keyboard when switching chats
+                      const activeElement = document.activeElement as HTMLElement;
+                      if (activeElement && activeElement.blur) {
+                        activeElement.blur();
+                      }
+
                       await setActiveChat(chat.id);
                       if (isMobile) onMobileToggle();
                     }
@@ -635,6 +653,12 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
                     if (isSelectAllMode) {
                       toggleChatSelection(chat.id);
                     } else {
+                      // Close keyboard when switching chats
+                      const activeElement = document.activeElement as HTMLElement;
+                      if (activeElement && activeElement.blur) {
+                        activeElement.blur();
+                      }
+
                       await setActiveChat(chat.id);
                       if (isMobile) onMobileToggle();
                     }
