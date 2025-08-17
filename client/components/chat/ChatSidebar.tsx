@@ -462,7 +462,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
           )}
 
           {/* New Chat Button / Batch Actions */}
-          {((isMobile && isMobileOpen) || (!isMobile && isSidebarOpen)) && (
+          {(isMobile || isSidebarOpen) && (
             <div className="space-y-2">
               {isSelectAllMode && selectedChats.size > 0 ? (
                 <div className="flex gap-2">
@@ -510,7 +510,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
                   aria-label="Create new chat"
                 >
                   <Plus className="w-4 h-4 flex-shrink-0" />
-                  {((isMobile && isMobileOpen) || (!isMobile && isSidebarOpen)) && 'New Chat'}
+                  {(isMobile || isSidebarOpen) && 'New Chat'}
                 </Button>
               )}
             </div>
@@ -547,7 +547,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
         </div>
 
         {/* Search - Only show when expanded or mobile */}
-        {((isMobile && isMobileOpen) || (!isMobile && isSidebarOpen)) && (
+        {(isMobile || isSidebarOpen) && (
           <div className="px-3 pb-3">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4" style={{ color: '#9CA3AF' }} />
@@ -569,7 +569,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
         )}
 
         {/* Divider - Only show when expanded or mobile */}
-        {((isMobile && isMobileOpen) || (!isMobile && isSidebarOpen)) && (
+        {(isMobile || isSidebarOpen) && (
           <div className="mx-3 h-px bg-white/10" />
         )}
 
@@ -577,7 +577,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
         <ScrollArea className="flex-1 px-3 py-3 min-h-0">
           <div className="space-y-1">
             {filteredChats.length === 0 ? (
-              ((isMobile && isMobileOpen) || (!isMobile && isSidebarOpen)) && (
+              (isMobile || isSidebarOpen) && (
                 <div className="p-6 text-center">
                   {searchQuery ? (
                     <p style={{ color: '#9CA3AF', fontSize: '14px', fontFamily: 'Inter, sans-serif' }}>No chats found</p>
@@ -626,7 +626,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
                   )}
 
                   {/* Full chat item for expanded state */}
-                  {((isMobile && isMobileOpen) || (!isMobile && isSidebarOpen)) && (
+                  {(isMobile || isSidebarOpen) && (
                     <div className="flex-1 min-w-0">
                       {editingChatId === chat.id ? (
                         <div className="flex items-center space-x-2">
