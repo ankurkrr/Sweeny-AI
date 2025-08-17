@@ -431,8 +431,9 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
             position: 'fixed',
             top: 0,
             left: 0,
-            height: '100vh',
+            height: '100dvh',
             width: '75vw',
+            maxWidth: '300px',
             zIndex: 100
           })
         }}
@@ -574,7 +575,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
         )}
 
         {/* Chat List */}
-        <ScrollArea className="flex-1 px-3 py-3 min-h-0">
+        <ScrollArea className={cn("flex-1 px-3 py-3 min-h-0", isMobile && "mobile-chat-list")}>
           <div className="space-y-1">
             {filteredChats.length === 0 ? (
               (isMobile || isSidebarOpen) && (
@@ -752,7 +753,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
 
         {/* User Profile Bar */}
         <div
-          className="relative p-3 border-t"
+          className={cn("relative p-3 border-t", isMobile && "mobile-profile-bar")}
           style={{
             backgroundColor: '#202123',
             borderTopColor: 'rgba(255, 255, 255, 0.1)'
