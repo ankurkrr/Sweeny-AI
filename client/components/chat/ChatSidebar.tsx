@@ -53,7 +53,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
   onSidebarToggle,
   isMobile
 }) => {
-  const { chats, activeChat, createNewChat, setActiveChat, deleteChat, renameChat } = useChat();
+  const { chats, activeChat, createNewChat, setActiveChat, clearActiveChat, deleteChat, renameChat } = useChat();
   const { signOut } = useSignOut();
   const user = useUserData();
   const mockAuth = useMockAuth();
@@ -500,7 +500,15 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
                 </div>
               ) : (
                 <Button
-                  onClick={() => createNewChat()}
+                  onClick={() => {
+                    // Clear active chat to show dashboard landing page
+                    clearActiveChat();
+                    // Close sidebar on mobile and desktop
+                    if (isMobile && isMobileOpen) {
+                      onMobileToggle();
+                    }
+                    // For desktop, keep sidebar state as is but could also close it
+                  }}
                   className="w-full flex items-center justify-start gap-3 px-3 py-3 rounded-lg text-sm font-normal transition-colors duration-200"
                   style={{
                     backgroundColor: 'transparent',
@@ -520,7 +528,10 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
           {/* Collapsed New Chat Button */}
           {!isMobile && !isSidebarOpen && (
             <Button
-              onClick={() => createNewChat()}
+              onClick={() => {
+                // Clear active chat to show dashboard landing page
+                clearActiveChat();
+              }}
               className="w-full flex items-center justify-center p-3 rounded-lg text-sm font-normal transition-colors duration-200"
               style={{
                 backgroundColor: 'transparent',

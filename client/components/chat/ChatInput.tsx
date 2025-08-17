@@ -52,7 +52,37 @@ export const ChatInput: React.FC = () => {
 
   useEffect(() => {
     if (textareaRef.current && !isSending) {
-      textareaRef.current.focus();
+      // Always focus the input - in dashboard mode or when active chat changes
+      const focusInput = () => {
+        if (textareaRef.current) {
+          textareaRef.current.focus();
+
+          // On mobile devices, ensure keyboard shows
+          if ('ontouchstart' in window || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+            // Additional mobile-specific focus triggers
+            textareaRef.current.focus();
+            textareaRef.current.setSelectionRange(0, 0);
+          }
+        }
+      };
+
+      // Use a small delay to ensure DOM is ready, especially after navigation
+      const timeoutId = setTimeout(focusInput, 150);
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [activeChat, isSending]);
+
+  // Additional effect to ensure focus when transitioning to dashboard (no active chat)
+  useEffect(() => {
+    if (!activeChat && textareaRef.current && !isSending) {
+      const timeoutId = setTimeout(() => {
+        if (textareaRef.current) {
+          textareaRef.current.focus();
+        }
+      }, 200);
+
+      return () => clearTimeout(timeoutId);
     }
   }, [activeChat, isSending]);
 
@@ -110,11 +140,14 @@ export const ChatInput: React.FC = () => {
                   "min-h-[24px] max-h-[120px] overflow-y-auto",
                   isSending && "cursor-not-allowed"
                 )}
-                style={{ 
-                  fontSize: '16px',
+                style={{
+                  fontSize: '16px', // 16px prevents zoom on iOS
                   lineHeight: '1.5'
                 }}
                 rows={1}
+                autoFocus
+                inputMode="text"
+                enterKeyHint="send"
               />
               
               {/* Send Button */}

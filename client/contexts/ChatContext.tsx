@@ -27,6 +27,7 @@ interface ChatContextType {
   isTyping: boolean;
   createNewChat: (firstMessage?: string) => Promise<Chat | null>;
   setActiveChat: (chatId: string) => Promise<void>;
+  clearActiveChat: () => void;
   sendMessage: (content: string) => void;
   deleteChat: (chatId: string) => Promise<void>;
   renameChat: (chatId: string, newTitle: string) => Promise<void>;
@@ -458,6 +459,10 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [activeChat]);
 
+  const clearActiveChat = useCallback(() => {
+    setActiveChatState(null);
+  }, []);
+
   const value = {
     chats,
     activeChat,
@@ -465,6 +470,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isTyping,
     createNewChat,
     setActiveChat,
+    clearActiveChat,
     sendMessage,
     deleteChat,
     renameChat,
