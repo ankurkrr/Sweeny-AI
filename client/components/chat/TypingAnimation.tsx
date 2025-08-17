@@ -87,19 +87,25 @@ export const TypingAnimation: React.FC<TypingAnimationProps> = ({ isMobile = fal
   }, [displayText, currentPhase, isTyping, animationSequence, getRandomizedSequence]);
 
   return (
-    <div className="flex-1 flex items-center justify-center p-8" style={{ backgroundColor: '#202123' }}>
+    <div
+      className={`flex-1 flex items-center justify-center ${isMobile ? 'p-4' : 'p-8'}`}
+      style={{
+        backgroundColor: '#202123',
+        minHeight: isMobile ? '200px' : '400px' // Ensure minimum space for typing animation
+      }}
+    >
       <div className="text-center max-w-4xl w-full">
         <div className="relative">
           <h1
             className={`font-bold transition-all duration-300 ease-in-out ${
-              isMobile ? 'text-2xl' : 'text-4xl'
+              isMobile ? 'text-xl' : 'text-4xl'
             }`}
             style={{
               color: '#FFFFFF',
               fontFamily: 'Montserrat, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
               letterSpacing: '-0.02em',
               lineHeight: '1.2',
-              minHeight: isMobile ? '2rem' : '3rem', // Prevent layout shift
+              minHeight: isMobile ? '1.5rem' : '3rem', // Prevent layout shift
             }}
           >
             {displayText}
@@ -123,21 +129,6 @@ export const TypingAnimation: React.FC<TypingAnimationProps> = ({ isMobile = fal
           />
         </div>
         
-        {/* Progress indicator dots */}
-        <div className="flex justify-center mt-8 space-x-2">
-          {animationSequence.map((_, index) => (
-            <div
-              key={index}
-              className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                index === currentPhase 
-                  ? 'bg-purple-500 scale-125' 
-                  : index < currentPhase 
-                    ? 'bg-purple-300' 
-                    : 'bg-gray-600'
-              }`}
-            />
-          ))}
-        </div>
       </div>
     </div>
   );

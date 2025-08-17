@@ -763,10 +763,35 @@ body {
       @apply text-base; /* Prevents zoom on iOS */
     }
 
-    /* Ensure proper mobile viewport handling */
+    /* Ensure proper mobile viewport handling with keyboard support */
     .chat-layout-container {
       height: 100dvh !important;
       min-height: 100dvh;
+      /* Use viewport-stable height for better keyboard handling */
+      height: calc(var(--vh, 1vh) * 100);
+    }
+
+    /* Improved keyboard handling */
+    @supports (-webkit-touch-callout: none) {
+      .chat-layout-container {
+        /* iOS Safari specific handling */
+        height: -webkit-fill-available;
+      }
+    }
+
+    /* Mobile keyboard adjustments */
+    .mobile-keyboard-active .chat-layout-container {
+      height: 100vh !important;
+      max-height: 100vh !important;
+    }
+
+    /* Ensure input stays visible on mobile keyboard */
+    .mobile-keyboard-active .chat-input-container {
+      position: fixed !important;
+      bottom: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      z-index: 1000 !important;
     }
 
     /* Fix mobile sidebar height and layout */
