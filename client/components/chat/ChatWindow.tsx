@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { useChat } from '@/contexts/ChatContext';
 import { Message, LoadingMessage } from './Message';
 import { ChatInput } from './ChatInput';
@@ -15,6 +15,7 @@ interface ChatWindowProps {
   isMobile: boolean;
   isKeyboardOpen: boolean;
   closeKeyboard: () => void;
+  forceCloseKeyboard: () => void;
 }
 
 export const ChatWindow: React.FC<ChatWindowProps> = ({
@@ -23,29 +24,54 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   isSidebarOpen,
   isMobile,
   isKeyboardOpen,
-  closeKeyboard
+  closeKeyboard,
+  forceCloseKeyboard
 }) => {
   const { activeChat, isTyping } = useChat();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  const scrollToBottom = useCallback((force = false) => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({
+        behavior: force ? 'auto' : 'smooth',
+        block: 'end'
+      });
+    }
+  }, []);
 
+  // Auto-scroll on new messages or typing
   useEffect(() => {
     scrollToBottom();
-  }, [activeChat?.messages, isTyping]);
+  }, [activeChat?.messages, isTyping, scrollToBottom]);
+
+  // Auto-scroll when switching chats
+  useEffect(() => {
+    if (activeChat) {
+      // Force immediate scroll when switching chats
+      setTimeout(() => scrollToBottom(true), 100);
+    }
+  }, [activeChat?.id, scrollToBottom]);
 
   if (!activeChat) {
     return (
-      <div className="flex-1 flex flex-col h-full overflow-hidden chat-window-container" style={{ backgroundColor: '#202123' }}>
+      <div
+        className="flex-1 flex flex-col h-full overflow-hidden chat-window-container"
+        style={{
+          backgroundColor: '#202123',
+          position: 'relative'
+        }}
+      >
         {/* Mobile Header */}
         {isMobile && (
-          <div className="flex items-center justify-between p-4 border-b border-white/10">
+          <div className="flex items-center justify-between p-4 border-b border-white/10 flex-shrink-0">
             <Button
               variant="ghost"
               size="icon"
-              onClick={onMobileMenuToggle}
+              onClick={() => {
+                forceCloseKeyboard();
+                onMobileMenuToggle();
+              }}
               className="hover:bg-gray-700 text-white transition-colors duration-200"
               aria-label="Open sidebar menu"
             >
@@ -64,24 +90,42 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
           </div>
         )}
 
-        {/* Typing Animation Screen */}
-        <TypingAnimation isMobile={isMobile} />
+        {/* Typing Animation Screen - Scrollable Container */}
+        <div
+          className="flex-1 min-h-0 overflow-hidden"
+          style={{
+            paddingBottom: isMobile ? '140px' : '0' // Space for fixed input on mobile
+          }}
+        >
+          <div className="h-full overflow-y-auto">
+            <TypingAnimation isMobile={isMobile} />
+          </div>
+        </div>
 
-        {/* Input Area */}
-        <ChatInput isKeyboardOpen={isKeyboardOpen} />
+        {/* Input Area - Fixed position on mobile */}
+        <ChatInput isKeyboardOpen={isKeyboardOpen} isMobile={isMobile} />
       </div>
     );
   }
 
   return (
-    <div className="flex-1 flex flex-col h-full overflow-hidden chat-window-container" style={{ backgroundColor: '#202123' }}>
+    <div
+      className="flex-1 flex flex-col h-full overflow-hidden chat-window-container"
+      style={{
+        backgroundColor: '#202123',
+        position: 'relative'
+      }}
+    >
       {/* Mobile Header */}
       {isMobile && (
-        <div className="flex items-center justify-between p-4 border-b border-white/10">
+        <div className="flex items-center justify-between p-4 border-b border-white/10 flex-shrink-0">
           <Button
             variant="ghost"
             size="icon"
-            onClick={onMobileMenuToggle}
+            onClick={() => {
+              forceCloseKeyboard();
+              onMobileMenuToggle();
+            }}
             className="hover:bg-gray-700 text-white transition-colors duration-200"
             aria-label="Open sidebar menu"
           >
@@ -100,19 +144,26 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         </div>
       )}
 
-      {/* Messages */}
-      <ScrollArea className="flex-1 min-h-0 chat-messages-scroll">
-        <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
-          {activeChat?.messages.map((message) => (
-            <Message key={message.id} message={message} />
-          ))}
-          {isTyping && <LoadingMessage />}
-          <div ref={messagesEndRef} />
-        </div>
-      </ScrollArea>
+      {/* Messages - Scrollable Container */}
+      <div
+        className="flex-1 min-h-0 overflow-hidden"
+        style={{
+          paddingBottom: isMobile ? '140px' : '0' // Space for fixed input on mobile
+        }}
+      >
+        <ScrollArea className="h-full chat-messages-scroll" ref={scrollAreaRef}>
+          <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
+            {activeChat?.messages.map((message) => (
+              <Message key={message.id} message={message} />
+            ))}
+            {isTyping && <LoadingMessage />}
+            <div ref={messagesEndRef} />
+          </div>
+        </ScrollArea>
+      </div>
 
-      {/* Input Area */}
-      <ChatInput isKeyboardOpen={isKeyboardOpen} />
+      {/* Input Area - Fixed position on mobile */}
+      <ChatInput isKeyboardOpen={isKeyboardOpen} isMobile={isMobile} />
     </div>
   );
 };

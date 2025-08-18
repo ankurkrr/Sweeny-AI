@@ -8,7 +8,7 @@ export const ChatLayout: React.FC = () => {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
-  const { isKeyboardOpen, viewportHeight, closeKeyboard } = useKeyboardManagement();
+  const { isKeyboardOpen, viewportHeight, closeKeyboard, forceCloseKeyboard } = useKeyboardManagement();
 
   // Check if screen is mobile
   useEffect(() => {
@@ -29,9 +29,9 @@ export const ChatLayout: React.FC = () => {
   }, []);
 
   const toggleMobileSidebar = () => {
-    // Close keyboard when opening mobile sidebar
+    // Force close keyboard when opening mobile sidebar
     if (!isMobileSidebarOpen && isMobile) {
-      closeKeyboard();
+      forceCloseKeyboard();
     }
     setIsMobileSidebarOpen(!isMobileSidebarOpen);
   };
@@ -46,8 +46,10 @@ export const ChatLayout: React.FC = () => {
         className="flex overflow-hidden chat-layout-container"
         style={{
           backgroundColor: '#202123',
-          height: viewportHeight,
-          transition: isMobile ? 'height 0.3s ease-in-out' : 'none'
+          height: isMobile ? viewportHeight : '100vh',
+          maxHeight: isMobile ? viewportHeight : '100vh',
+          transition: 'none', // Remove transition for smoother keyboard handling
+          position: 'relative'
         }}
       >
         <ChatSidebar
@@ -64,6 +66,7 @@ export const ChatLayout: React.FC = () => {
           isMobile={isMobile}
           isKeyboardOpen={isKeyboardOpen}
           closeKeyboard={closeKeyboard}
+          forceCloseKeyboard={forceCloseKeyboard}
         />
       </div>
     </ChatProvider>

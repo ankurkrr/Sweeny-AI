@@ -150,11 +150,14 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [user]);
 
   const setActiveChat = useCallback(async (chatId: string) => {
-    // Close keyboard when switching chats
+    // Force close keyboard when switching chats
     const activeElement = document.activeElement as HTMLElement;
     if (activeElement && activeElement.blur) {
       activeElement.blur();
     }
+
+    // Force close mobile keyboard state
+    document.body.classList.remove('mobile-keyboard-active');
 
     // Cleanup empty chats when switching away from current chat
     if (activeChat && chats.length > 1) {
@@ -471,6 +474,9 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (activeElement && activeElement.blur) {
       activeElement.blur();
     }
+
+    // Force close mobile keyboard state
+    document.body.classList.remove('mobile-keyboard-active');
 
     setActiveChatState(null);
   }, []);

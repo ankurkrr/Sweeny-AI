@@ -6,9 +6,10 @@ import { cn } from '@/lib/utils';
 
 interface ChatInputProps {
   isKeyboardOpen?: boolean;
+  isMobile?: boolean;
 }
 
-export const ChatInput: React.FC<ChatInputProps> = ({ isKeyboardOpen = false }) => {
+export const ChatInput: React.FC<ChatInputProps> = ({ isKeyboardOpen = false, isMobile = false }) => {
   const [message, setMessage] = useState('');
   const [isComposing, setIsComposing] = useState(false);
   const [isSending, setIsSending] = useState(false);
@@ -54,61 +55,60 @@ export const ChatInput: React.FC<ChatInputProps> = ({ isKeyboardOpen = false }) 
     }
   };
 
+  // Auto-focus only when user explicitly starts a new chat, not when switching chats
   useEffect(() => {
-    if (textareaRef.current && !isSending) {
-      // Always focus the input - in dashboard mode or when active chat changes
+    if (textareaRef.current && !isSending && !activeChat && !isMobile) {
+      // Only focus when there's no active chat (new chat/dashboard mode) and not on mobile
       const focusInput = () => {
         if (textareaRef.current) {
           textareaRef.current.focus();
-
-          // On mobile devices, ensure keyboard shows
-          if ('ontouchstart' in window || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-            // Additional mobile-specific focus triggers
-            textareaRef.current.focus();
-            textareaRef.current.setSelectionRange(0, 0);
-          }
         }
       };
 
-      // Use a small delay to ensure DOM is ready, especially after navigation
+      // Use a small delay to ensure DOM is ready
       const timeoutId = setTimeout(focusInput, 150);
 
       return () => clearTimeout(timeoutId);
     }
-  }, [activeChat, isSending]);
+  }, [activeChat, isSending, isMobile]);
 
-  // Additional effect to ensure focus when transitioning to dashboard (no active chat)
-  useEffect(() => {
-    if (!activeChat && textareaRef.current && !isSending) {
-      const timeoutId = setTimeout(() => {
+  // Handle manual focus on mobile - only when user explicitly clicks/taps input
+  const handleInputFocus = () => {
+    // On mobile, ensure input stays visible when keyboard opens
+    if (isMobile && textareaRef.current) {
+      // Small delay to allow keyboard to open
+      setTimeout(() => {
         if (textareaRef.current) {
-          textareaRef.current.focus();
+          // Ensure the input container is visible
+          textareaRef.current.scrollIntoView({
+            behavior: 'smooth',
+            block: 'nearest',
+            inline: 'nearest'
+          });
         }
-      }, 200);
-
-      return () => clearTimeout(timeoutId);
+      }, 150);
     }
-  }, [activeChat, isSending]);
+  };
 
   const isDisabled = !message.trim() || isComposing || isSending;
 
   return (
     <div
       className={cn(
-        "p-4 pt-2 chat-input-container transition-all duration-300",
+        "p-4 pt-2 chat-input-container",
         isKeyboardOpen && "keyboard-active"
       )}
       style={{
         backgroundColor: '#202123',
-        paddingBottom: isKeyboardOpen
-          ? 'max(8px, env(safe-area-inset-bottom))'
-          : 'max(16px, env(safe-area-inset-bottom))',
-        position: isKeyboardOpen ? 'fixed' : 'sticky',
+        paddingBottom: `max(16px, env(safe-area-inset-bottom))`,
+        position: isMobile ? 'fixed' : 'sticky',
         bottom: 0,
         left: 0,
         right: 0,
-        zIndex: isKeyboardOpen ? 1000 : 'auto',
-        borderTop: isKeyboardOpen ? '1px solid rgba(255, 255, 255, 0.1)' : 'none'
+        zIndex: isMobile ? 1000 : 'auto',
+        borderTop: isMobile ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
+        transform: isKeyboardOpen && isMobile ? 'translateY(0)' : 'none',
+        transition: 'none' // Remove transitions for smoother keyboard handling
       }}
     >
       <div className="max-w-3xl mx-auto">
@@ -147,6 +147,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({ isKeyboardOpen = false }) 
                 onKeyDown={handleKeyDown}
                 onCompositionStart={() => setIsComposing(true)}
                 onCompositionEnd={() => setIsComposing(false)}
+                onFocus={handleInputFocus}
                 placeholder="Message Sweeny"
                 disabled={isSending}
                 className={cn(
@@ -157,12 +158,17 @@ export const ChatInput: React.FC<ChatInputProps> = ({ isKeyboardOpen = false }) 
                 )}
                 style={{
                   fontSize: '16px', // 16px prevents zoom on iOS
-                  lineHeight: '1.5'
+                  lineHeight: '1.5',
+                  WebkitAppearance: 'none', // Remove iOS styling
+                  WebkitBorderRadius: '0' // Remove iOS border radius
                 }}
                 rows={1}
-                autoFocus
                 inputMode="text"
                 enterKeyHint="send"
+                autoCapitalize="sentences"
+                autoComplete="off"
+                autoCorrect="on"
+                spellCheck="true"
               />
               
               {/* Send Button */}
