@@ -32,7 +32,6 @@ export default function AuthScreen({ mode }) {
   const [retryCount, setRetryCount] = useState(0);
     const [signupSuccess, setSignupSuccess] = useState(!!location.state?.message);
     const [successMessage, setSuccessMessage] = useState(location.state?.message || '');
-    const [showVerificationMessage, setShowVerificationMessage] = useState(false);
 
   const isAuthenticated = useAuthenticated();
   const { isLoading: authStatusLoading } = useAuthenticationStatus();
@@ -171,28 +170,25 @@ export default function AuthScreen({ mode }) {
           throw signUpResult.error;
         }
 
-        // Account created successfully - show verification message
+        // Account created successfully - redirect to verification page
         setIsSigningUp(false);
-        setShowVerificationMessage(true);
-        setIsSignUp(false); // Switch to sign in mode
-
-        // Clear form fields except email
-        setConfirmPassword('');
-        setFirstName('');
-        setLastName('');
-        setPassword('');
-        setErrors({});
-        setAuthError('');
+        setIsProcessing(false);
 
         toast.success('Account created! Please check your email for verification.', {
           icon: <CheckCircle className="w-4 h-4" />,
-          duration: 5000,
+          duration: 3000,
+        });
+
+        // Redirect to verification page with user data
+        navigate('/verification', {
+          replace: true,
+          state: {
+            email: email,
+            userName: `${firstName} ${lastName}`.trim()
+          }
         });
 
         return; // Don't proceed to auto-login, wait for email verification
-
-        // Auto-login code removed - now showing verification message instead
-        setIsProcessing(false);
       } else {
         // Regular sign in
         let result;
@@ -323,7 +319,6 @@ export default function AuthScreen({ mode }) {
     setAuthError('');
     setSignupSuccess(false);
     setSuccessMessage('');
-    setShowVerificationMessage(false);
     setRetryCount(0); // Reset retry count
     // Navigation will be handled by route state updates
     window.history.pushState({}, '', !isSignUp ? '/signup' : '/signin');
@@ -428,22 +423,6 @@ export default function AuthScreen({ mode }) {
               </Alert>
             )}
 
-            {/* Show email verification message after signup */}
-            {showVerificationMessage && !isSignUp && (
-              <Alert className="bg-blue-900/80 border-blue-500/30 text-blue-200">
-                <CheckCircle className="w-4 h-4 text-blue-400" />
-                <AlertDescription>
-                  <div className="space-y-2">
-                    <strong>Account created successfully!</strong>
-                    <p>We've sent a verification email to <strong>{email}</strong></p>
-                    <p>Please check your email and click the verification link to activate your account.</p>
-                    <p className="text-xs text-blue-300 mt-2">
-                      Don't see the email? Check your spam/junk folder.
-                    </p>
-                  </div>
-                </AlertDescription>
-              </Alert>
-            )}
 
             {/* Show success message when signup succeeded but auto-signin failed */}
             {signupSuccess && !isSignUp && (

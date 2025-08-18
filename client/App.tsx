@@ -10,6 +10,7 @@ import { MockAuthProvider, useEnhancedAuthenticated, useMockAuth } from "@/lib/m
 import AuthScreen from "@/components/AuthScreen";
 import { ChatLayout } from "@/components/chat/ChatLayout";
 import ChatPage from "@/pages/Chat";
+import VerificationPage from "@/pages/Verification";
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
 import "@/lib/global-api";
 
@@ -98,6 +99,14 @@ function AppRoutes() {
         element={
           <AuthRoute>
             <AuthScreen mode="signup" />
+          </AuthRoute>
+        }
+      />
+      <Route
+        path="/verification"
+        element={
+          <AuthRoute>
+            <VerificationPage />
           </AuthRoute>
         }
       />
