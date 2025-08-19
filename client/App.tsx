@@ -7,6 +7,7 @@ import { ApolloProvider } from "@apollo/client";
 import { nhost } from "@/lib/nhost.js";
 import { apolloClient } from "@/lib/apollo.js";
 import { MockAuthProvider, useEnhancedAuthenticated, useMockAuth } from "@/lib/mock-auth-provider";
+import { ChatProvider } from "@/contexts/ChatContext";
 import AuthScreen from "@/components/AuthScreen";
 import { ChatLayout } from "@/components/chat/ChatLayout";
 import ChatPage from "@/pages/Chat";
@@ -114,15 +115,19 @@ function AppRoutes() {
         path="/"
         element={
           <PrivateRoute>
-            <ChatLayout />
+            <ChatProvider>
+              <ChatLayout />
+            </ChatProvider>
           </PrivateRoute>
         }
       />
       <Route
-        path="/c/:chatId"
+        path="/chat/:chatId"
         element={
           <PrivateRoute>
-            <ChatPage />
+            <ChatProvider>
+              <ChatPage />
+            </ChatProvider>
           </PrivateRoute>
         }
       />

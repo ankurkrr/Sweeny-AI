@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { sendMessageToBot } from '@/lib/n8n-api';
 import { createChat, getUserChats, updateChatTimestamp, deleteChat as deleteChatApi, renameChat as renameChatApi, getChatMessages } from '@/lib/chat-api';
 import { useMockAuth } from '@/lib/mock-auth-provider';
@@ -26,7 +27,7 @@ interface ChatContextType {
   isLoading: boolean;
   isTyping: boolean;
   createNewChat: (firstMessage?: string) => Promise<Chat | null>;
-  setActiveChat: (chatId: string) => Promise<void>;
+  setActiveChat: (chatId: string, navigate?: boolean) => Promise<void>;
   clearActiveChat: () => void;
   sendMessage: (content: string) => void;
   deleteChat: (chatId: string) => Promise<void>;
@@ -49,6 +50,10 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [activeChat, setActiveChatState] = useState<Chat | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+
+  // Navigation hooks
+  const navigate = useNavigate();
+  const location = useLocation();
 
   // Use existing authentication system
   const mockAuth = useMockAuth();
@@ -142,14 +147,18 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setChats(prev => [newChat, ...prev]);
       setActiveChatState(newChat);
       console.log('New chat set as active:', newChat.id);
+
+      // Navigate to the new chat URL
+      navigate(`/chat/${newChat.id}`, { replace: true });
+
       return newChat;
     } catch (error) {
       console.error('Failed to create chat:', error);
       return null;
     }
-  }, [user]);
+  }, [user, navigate]);
 
-  const setActiveChat = useCallback(async (chatId: string) => {
+  const setActiveChat = useCallback(async (chatId: string, shouldNavigate: boolean = true) => {
     // Force close keyboard when switching chats
     const activeElement = document.activeElement as HTMLElement;
     if (activeElement && activeElement.blur) {
@@ -181,12 +190,22 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
           ...chat,
           messages: formattedMessages
         });
+
+        // Navigate to chat URL if requested and not already on it
+        if (shouldNavigate && location.pathname !== `/chat/${chatId}`) {
+          navigate(`/chat/${chatId}`, { replace: true });
+        }
       } catch (error) {
         console.error('Failed to load chat messages:', error);
         setActiveChatState(chat);
+
+        // Navigate even on error if requested
+        if (shouldNavigate && location.pathname !== `/chat/${chatId}`) {
+          navigate(`/chat/${chatId}`, { replace: true });
+        }
       }
     }
-  }, [chats, activeChat, cleanupEmptyChats]);
+  }, [chats, activeChat, cleanupEmptyChats, navigate, location.pathname]);
 
   const sendMessage = useCallback(async (content: string) => {
     if (!user || (!mockAuth.isAuthenticated && !isAuthenticated)) {
@@ -444,12 +463,16 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setChats(prev => prev.filter(chat => chat.id !== chatId));
       if (activeChat?.id === chatId) {
         setActiveChatState(null);
+        // Navigate to dashboard if we deleted the active chat
+        if (location.pathname === `/chat/${chatId}`) {
+          navigate('/', { replace: true });
+        }
       }
     } catch (error) {
       console.error('Failed to delete chat:', error);
       throw error;
     }
-  }, [activeChat]);
+  }, [activeChat, navigate, location.pathname]);
 
   const renameChat = useCallback(async (chatId: string, newTitle: string) => {
     try {
@@ -479,7 +502,12 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     document.body.classList.remove('mobile-keyboard-active');
 
     setActiveChatState(null);
-  }, []);
+
+    // Navigate to dashboard if not already there
+    if (location.pathname !== '/') {
+      navigate('/', { replace: true });
+    }
+  }, [navigate, location.pathname]);
 
   const value = {
     chats,

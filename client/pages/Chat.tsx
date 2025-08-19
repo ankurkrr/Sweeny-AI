@@ -48,7 +48,7 @@ export default function ChatPage() {
 
         // Set the active chat if different from current
         if (!activeChat || activeChat.id !== chatId) {
-          await setActiveChat(chatId);
+          await setActiveChat(chatId, false); // Don't navigate since we're already on the chat URL
         }
       } catch (error) {
         console.error('Error loading chat:', error);
