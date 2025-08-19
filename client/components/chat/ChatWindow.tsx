@@ -13,6 +13,7 @@ interface ChatWindowProps {
   onSidebarToggle: () => void;
   isSidebarOpen: boolean;
   isMobile: boolean;
+  isMobileSidebarOpen?: boolean;
   isKeyboardOpen: boolean;
   closeKeyboard: () => void;
   forceCloseKeyboard: () => void;
@@ -23,6 +24,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   onSidebarToggle,
   isSidebarOpen,
   isMobile,
+  isMobileSidebarOpen = false,
   isKeyboardOpen,
   closeKeyboard,
   forceCloseKeyboard
@@ -103,7 +105,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         </div>
 
         {/* Input Area - Fixed position on mobile */}
-        <ChatInput isKeyboardOpen={isKeyboardOpen} isMobile={isMobile} />
+        <ChatInput isKeyboardOpen={isKeyboardOpen} isMobile={isMobile} isMobileSidebarOpen={isMobileSidebarOpen} />
       </div>
     );
   }
@@ -163,7 +165,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
       </div>
 
       {/* Input Area - Fixed position on mobile */}
-      <ChatInput isKeyboardOpen={isKeyboardOpen} isMobile={isMobile} />
+      <ChatInput isKeyboardOpen={isKeyboardOpen} isMobile={isMobile} isMobileSidebarOpen={isMobileSidebarOpen} />
     </div>
   );
 };

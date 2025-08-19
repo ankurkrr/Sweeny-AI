@@ -7,9 +7,10 @@ import { cn } from '@/lib/utils';
 interface ChatInputProps {
   isKeyboardOpen?: boolean;
   isMobile?: boolean;
+  isMobileSidebarOpen?: boolean;
 }
 
-export const ChatInput: React.FC<ChatInputProps> = ({ isKeyboardOpen = false, isMobile = false }) => {
+export const ChatInput: React.FC<ChatInputProps> = ({ isKeyboardOpen = false, isMobile = false, isMobileSidebarOpen = false }) => {
   const [message, setMessage] = useState('');
   const [isComposing, setIsComposing] = useState(false);
   const [isSending, setIsSending] = useState(false);
@@ -105,7 +106,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({ isKeyboardOpen = false, is
         bottom: 0,
         left: 0,
         right: 0,
-        zIndex: isMobile ? 1000 : 'auto',
+        zIndex: isMobile ? (isMobileSidebarOpen ? 50 : 1000) : 'auto',
         borderTop: isMobile ? '1px solid rgba(255, 255, 255, 0.1)' : 'none',
         transform: isKeyboardOpen && isMobile ? 'translateY(0)' : 'none',
         transition: 'none' // Remove transitions for smoother keyboard handling

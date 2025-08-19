@@ -4,7 +4,6 @@ import { useSignOut, useUserData } from '@nhost/react';
 import { useMockAuth } from '@/lib/mock-auth-provider';
 import { MOCK_ENABLED } from '@/lib/mock-auth';
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { ConfirmationModal } from '@/components/ui/confirmation-modal';
 import {
   MessageCircle,
@@ -16,24 +15,10 @@ import {
   Search,
   Edit2,
   Check,
-  XIcon,
-  Folder,
-  Sparkles,
-  User,
   Menu,
-  ChevronLeft,
-  ChevronRight,
   UserX,
   CheckSquare
 } from 'lucide-react';
-import ChatBotIcon from '../ChatBotIcon';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
@@ -63,9 +48,11 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [selectedChats, setSelectedChats] = useState<Set<string>>(new Set());
   const [isSelectAllMode, setIsSelectAllMode] = useState(false);
+  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const profileButtonRef = useRef<HTMLButtonElement>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
+  const dropdownRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
   // Modal states
   const [deleteChatModal, setDeleteChatModal] = useState<{
@@ -130,6 +117,44 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
     }
   }, [isProfileMenuOpen]);
 
+  // Close chat dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (openDropdownId) {
+        const dropdownElement = dropdownRefs.current[openDropdownId];
+        const targetElement = event.target as Element;
+
+        // Check if click is outside the dropdown and not on the trigger button
+        if (dropdownElement && !dropdownElement.contains(targetElement)) {
+          // Also check if it's not the three-dot button for this chat
+          const isThreeDotButton = targetElement.closest(`[data-chat-dropdown="${openDropdownId}"]`);
+          if (!isThreeDotButton) {
+            setOpenDropdownId(null);
+          }
+        }
+      }
+    };
+
+    if (openDropdownId) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [openDropdownId]);
+
+  // Close chat dropdown on escape key
+  useEffect(() => {
+    const handleEscKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && openDropdownId) {
+        setOpenDropdownId(null);
+      }
+    };
+
+    if (openDropdownId) {
+      document.addEventListener('keydown', handleEscKey);
+      return () => document.removeEventListener('keydown', handleEscKey);
+    }
+  }, [openDropdownId]);
+
   // Touch gesture handlers for mobile sidebar
   useEffect(() => {
     if (!isMobile) return;
@@ -168,7 +193,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
 
       // Apply real-time transform to sidebar during drag
       if (sidebarRef.current) {
-        const sidebarWidth = window.innerWidth * 0.75;
+        const sidebarWidth = Math.min(window.innerWidth * 0.8, 400);
         let translateX = 0;
 
         if (!isMobileOpen) {
@@ -397,12 +422,12 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
       {isMobile && (
         <div
           className={cn(
-            "fixed inset-0 z-40 transition-opacity duration-300 ease-in-out",
+            "fixed inset-0 z-30 transition-opacity duration-300 ease-in-out",
             isMobileOpen
               ? "opacity-100 pointer-events-auto"
               : "opacity-0 pointer-events-none"
           )}
-          style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
+          style={{ backgroundColor: 'rgba(0, 0, 0, 0.4)' }}
           onClick={onMobileToggle}
         />
       )}
@@ -411,51 +436,42 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
       <div
         ref={sidebarRef}
         className={cn(
-          "flex flex-col shadow-xl h-full overflow-hidden chat-sidebar-container",
+          "h-full flex flex-col shadow-xl",
           isMobile ? (
             cn(
-              "fixed top-0 left-0 z-50",
+              "mobile-sidebar-wrapper",
               "transition-transform duration-300 ease-in-out",
               isMobileOpen ? "translate-x-0" : "-translate-x-full"
             )
           ) : (
             cn(
-              "relative transition-all duration-300 ease-in-out",
-              isSidebarOpen ? "w-[260px]" : "w-[60px]"
+              "relative chat-sidebar-container transition-all duration-300 ease-in-out",
+              isSidebarOpen ? "w-[260px] min-w-[260px] max-w-[260px]" : "w-[50px] min-w-[50px] max-w-[50px]"
             )
           )
         )}
         style={{
-          backgroundColor: '#202123',
-          ...(isMobile && {
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            height: '100dvh',
-            width: '75vw',
-            maxWidth: '300px',
-            zIndex: 100
-          })
+          backgroundColor: '#202123'
         }}
       >
         
         {/* Header with Hamburger Toggle and New Chat Button */}
-        <div className="p-3">
+        <div className="p-2.5">
           {/* Hamburger Toggle Button - Always visible on desktop, hidden on mobile */}
           {!isMobile && (
             <div className="flex items-center justify-between mb-3">
               <button
                 onClick={onSidebarToggle}
-                className="p-2 rounded-lg text-white hover:bg-gray-700 transition-colors duration-200"
+                className="p-1.5 rounded-lg text-white hover:bg-gray-700 transition-colors duration-200"
                 aria-label="Toggle sidebar"
                 aria-expanded={isSidebarOpen}
                 tabIndex={0}
                 style={{ fontFamily: 'Inter, sans-serif' }}
               >
-                <Menu className="w-4 h-4" />
+                <Menu className="w-3.5 h-3.5" />
               </button>
               {isSidebarOpen && (
-                <div className="text-lg font-semibold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+                <div className="text-base font-semibold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
                   Sweeny
                 </div>
               )}
@@ -469,7 +485,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
                 <div className="flex gap-2">
                   <Button
                     onClick={deleteSelectedChats}
-                    className="flex-1 flex items-center justify-center gap-2 px-3 py-3 rounded-lg text-sm font-normal transition-colors duration-200"
+                  className="flex-1 flex items-center justify-center gap-1.5 px-2 py-2 rounded-lg text-xs font-normal transition-colors duration-200"
                     style={{
                       backgroundColor: '#dc2626',
                       border: '1px solid #dc2626',
@@ -478,7 +494,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
                     }}
                     aria-label={`Delete ${selectedChats.size} selected chats`}
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-3 h-3" />
                     Delete ({selectedChats.size})
                   </Button>
                   <Button
@@ -486,7 +502,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
                       setSelectedChats(new Set());
                       setIsSelectAllMode(false);
                     }}
-                    className="px-3 py-3 rounded-lg text-sm font-normal transition-colors duration-200"
+                    className="px-2 py-2 rounded-lg text-xs font-normal transition-colors duration-200"
                     style={{
                       backgroundColor: 'transparent',
                       border: '1px solid rgba(255, 255, 255, 0.2)',
@@ -495,7 +511,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
                     }}
                     aria-label="Cancel selection"
                   >
-                    <X className="w-4 h-4" />
+                    <X className="w-3 h-3" />
                   </Button>
                 </div>
               ) : (
@@ -515,7 +531,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
                     }
                     // For desktop, keep sidebar state as is but could also close it
                   }}
-                  className="w-full flex items-center justify-start gap-3 px-3 py-3 rounded-lg text-sm font-normal transition-colors duration-200"
+                  className="w-full flex items-center justify-start gap-2 px-2.5 py-2.5 rounded-lg text-xs font-normal transition-colors duration-200"
                   style={{
                     backgroundColor: 'transparent',
                     border: '1px solid rgba(255, 255, 255, 0.2)',
@@ -524,7 +540,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
                   }}
                   aria-label="Create new chat"
                 >
-                  <Plus className="w-4 h-4 flex-shrink-0" />
+                  <Plus className="w-3.5 h-3.5 flex-shrink-0" />
                   {(isMobile || isSidebarOpen) && 'New Chat'}
                 </Button>
               )}
@@ -544,7 +560,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
                 // Clear active chat to show dashboard landing page
                 clearActiveChat();
               }}
-              className="w-full flex items-center justify-center p-3 rounded-lg text-sm font-normal transition-colors duration-200"
+              className="w-full flex items-center justify-center p-2.5 rounded-lg text-xs font-normal transition-colors duration-200"
               style={{
                 backgroundColor: 'transparent',
                 border: '1px solid rgba(255, 255, 255, 0.2)',
@@ -552,7 +568,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
               }}
               aria-label="Create new chat"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-3.5 h-3.5" />
             </Button>
           )}
 
@@ -562,7 +578,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
               variant="ghost"
               size="icon"
               onClick={onMobileToggle}
-              className="absolute top-3 right-3 text-white hover:bg-gray-700 no-white-hover"
+              className="absolute top-2.5 right-2.5 text-white hover:bg-gray-700 no-white-hover"
               aria-label="Close sidebar"
             >
               <X className="w-5 h-5" />
@@ -572,18 +588,18 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
 
         {/* Search - Only show when expanded or mobile */}
         {(isMobile || isSidebarOpen) && (
-          <div className="px-3 pb-3">
+          <div className="px-2.5 pb-2.5">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4" style={{ color: '#9CA3AF' }} />
+              <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5" style={{ color: '#9CA3AF' }} />
               <Input
                 placeholder="Search chats"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-10 text-sm border-none focus:ring-0 transition-colors duration-200"
+                className="pl-8 pr-8 text-xs border-none focus:ring-0 transition-colors duration-200"
                 style={{
                   backgroundColor: '#343541',
                   color: '#D1D5DB',
-                  fontSize: '14px',
+                  fontSize: '12px',
                   fontFamily: 'Inter, sans-serif'
                 }}
                 aria-label="Search chats"
@@ -593,10 +609,10 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
                   variant="ghost"
                   size="sm"
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-1 top-1/2 transform -translate-y-1/2 p-1 h-8 w-8 hover:bg-white/10 transition-colors duration-200"
+                  className="absolute right-1 top-1/2 transform -translate-y-1/2 p-0.5 h-6 w-6 hover:bg-white/10 transition-colors duration-200"
                   aria-label="Clear search"
                 >
-                  <X className="w-4 h-4" style={{ color: '#9CA3AF' }} />
+                  <X className="w-3 h-3" style={{ color: '#9CA3AF' }} />
                 </Button>
               )}
             </div>
@@ -605,19 +621,19 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
 
         {/* Divider - Only show when expanded or mobile */}
         {(isMobile || isSidebarOpen) && (
-          <div className="mx-3 h-px bg-white/10" />
+          <div className="mx-2.5 h-px bg-white/10" />
         )}
 
         {/* Chat List */}
-        <ScrollArea className={cn("flex-1 px-3 py-3 min-h-0", isMobile && "mobile-chat-list")}>
+        <div className="flex-1 overflow-y-auto px-2.5 py-2.5 min-h-0">
           <div className="space-y-1">
             {filteredChats.length === 0 ? (
               (isMobile || isSidebarOpen) && (
                 <div className="p-6 text-center">
                   {searchQuery ? (
-                    <p style={{ color: '#9CA3AF', fontSize: '14px', fontFamily: 'Inter, sans-serif' }}>No chats found</p>
+                    <p style={{ color: '#9CA3AF', fontSize: '12px', fontFamily: 'Inter, sans-serif' }}>No chats found</p>
                   ) : (
-                    <p style={{ color: '#9CA3AF', fontSize: '14px', fontFamily: 'Inter, sans-serif' }}>No conversations yet</p>
+                    <p style={{ color: '#9CA3AF', fontSize: '12px', fontFamily: 'Inter, sans-serif' }}>No conversations yet</p>
                   )}
                 </div>
               )
@@ -626,7 +642,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
                 <div
                   key={chat.id}
                   className={cn(
-                    "chat-item group flex items-center p-2 rounded-lg transition-all duration-200 cursor-pointer",
+                    "chat-item group relative flex items-center p-2 rounded-lg transition-all duration-200 cursor-pointer",
                     selectedChats.has(chat.id) && isSelectAllMode
                       ? "bg-blue-500/20 border border-blue-500/50"
                       : activeChat?.id === chat.id
@@ -668,7 +684,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
                   {/* Chat Icon for collapsed state */}
                   {!isMobile && !isSidebarOpen && (
                     <div className="flex items-center justify-center w-full">
-                      <MessageCircle className="w-5 h-5 text-white" />
+                      <MessageCircle className="w-4 h-4 text-white" />
                     </div>
                   )}
 
@@ -688,10 +704,10 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
                                 cancelEditing();
                               }
                             }}
-                            className="flex-1 text-sm bg-transparent border border-white/20 rounded px-2 py-1 focus:outline-none focus:border-white/40 transition-colors duration-200"
+                            className="flex-1 text-xs bg-transparent border border-white/20 rounded px-1.5 py-0.5 focus:outline-none focus:border-white/40 transition-colors duration-200"
                             style={{
                               color: '#FFFFFF',
-                              fontSize: '14px',
+                              fontSize: '12px',
                               fontFamily: 'Inter, sans-serif'
                             }}
                             autoFocus
@@ -700,34 +716,37 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
                           />
                         </div>
                       ) : (
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1 min-w-0">
+                        <div className="flex items-center w-full pr-1">
+                          <div className="flex-1 min-w-0 overflow-hidden" style={{ maxWidth: '180px' }}>
                             <p
-                              className="text-sm truncate transition-colors duration-200"
+                              className="text-xs chat-text-truncate transition-colors duration-200"
                               style={{
                                 color: '#E5E7EB',
-                                fontSize: '0.95rem',
+                                fontSize: '0.8rem',
                                 fontWeight: '500',
-                                fontFamily: 'Inter, sans-serif'
+                                fontFamily: 'Inter, sans-serif',
+                                maxWidth: '180px'
                               }}
+                              title={chat.title}
                             >
                               {chat.title}
                             </p>
                             {/* Timestamp */}
                             {chat.lastMessage && (
                               <p
-                                className="text-xs mt-1 transition-colors duration-200"
+                                className="text-xs mt-0.5 chat-text-truncate transition-colors duration-200"
                                 style={{
                                   color: '#9CA3AF',
-                                  fontSize: '0.8rem',
-                                  fontFamily: 'Inter, sans-serif'
+                                  fontSize: '0.7rem',
+                                  fontFamily: 'Inter, sans-serif',
+                                  maxWidth: '180px'
                                 }}
                               >
                                 {formatDistanceToNow(chat.lastMessage, { addSuffix: true })}
                               </p>
                             )}
                           </div>
-                          <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                          <div className="flex items-center justify-center w-8 h-8 flex-shrink-0 ml-2 relative">
                             {isSelectAllMode ? (
                               <Button
                                 variant="ghost"
@@ -755,37 +774,75 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
                                 <Button
                                   variant="ghost"
                                   size="icon"
+                                  data-chat-dropdown={chat.id}
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    startEditing(chat.id, chat.title);
+                                    setOpenDropdownId(openDropdownId === chat.id ? null : chat.id);
                                   }}
-                                  className="w-6 h-6 hover:bg-gray-700 text-white transition-colors duration-200"
-                                  aria-label={`Edit chat title: ${chat.title}`}
+                                  className="w-6 h-6 hover:bg-gray-700 text-white transition-all duration-200 opacity-0 group-hover:opacity-100 chat-action-btn no-white-hover"
+                                  style={{
+                                    opacity: openDropdownId === chat.id ? 1 : undefined
+                                  }}
+                                  aria-label={`Open actions for ${chat.title}`}
+                                  aria-expanded={openDropdownId === chat.id}
                                 >
-                                  <Edit2 className="w-3 h-3" />
+                                  <MoreVertical className="w-3 h-3 flex-shrink-0" />
                                 </Button>
-                                {/* Only show delete button for chats that have messages */}
-                                {(chat.messages.length > 0 || (chat.messageCount !== undefined && chat.messageCount > 0)) && (
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setDeleteChatModal({
-                                        isOpen: true,
-                                        chatId: chat.id,
-                                        chatTitle: chat.title
-                                      });
-                                      // Auto-close sidebar on mobile when delete is clicked
-                                      if (isMobile && isMobileOpen) {
-                                        onMobileToggle();
-                                      }
+
+                                {/* Dropdown Menu - Positioned absolutely below action button */}
+                                {openDropdownId === chat.id && (
+                                  <div
+                                    ref={(el) => {
+                                      if (el) dropdownRefs.current[chat.id] = el;
                                     }}
-                                    className="w-6 h-6 hover:bg-red-500/20 text-red-400 hover:text-red-300 transition-colors duration-200"
-                                    aria-label={`Delete chat: ${chat.title}`}
+                                    className="absolute right-0 top-full mt-1 z-[60] bg-gray-800 rounded-md shadow-xl border border-gray-600 min-w-[140px] py-1"
+                                    style={{
+                                      animation: 'dropdownFadeIn 0.15s ease-out',
+                                      boxShadow: '0 10px 25px rgba(0, 0, 0, 0.5)'
+                                    }}
+                                    onClick={(e) => e.stopPropagation()}
                                   >
-                                    <Trash2 className="w-3 h-3" />
-                                  </Button>
+                                    <button
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        startEditing(chat.id, chat.title);
+                                        setOpenDropdownId(null);
+                                      }}
+                                      className="w-full flex items-center px-3 py-2.5 text-left text-xs text-white hover:bg-gray-700 focus:bg-gray-700 focus:outline-none transition-colors duration-200 no-white-hover"
+                                      style={{ fontFamily: 'Inter, sans-serif' }}
+                                      tabIndex={0}
+                                    >
+                                      <Edit2 className="w-3.5 h-3.5 mr-2.5 flex-shrink-0" />
+                                      <span className="truncate">Rename</span>
+                                    </button>
+
+                                    {/* Only show delete option for chats that have messages */}
+                                    {(chat.messages.length > 0 || (chat.messageCount !== undefined && chat.messageCount > 0)) && (
+                                      <button
+                                        onClick={(e) => {
+                                          e.preventDefault();
+                                          e.stopPropagation();
+                                          setDeleteChatModal({
+                                            isOpen: true,
+                                            chatId: chat.id,
+                                            chatTitle: chat.title
+                                          });
+                                          setOpenDropdownId(null);
+                                          // Auto-close sidebar on mobile when delete is clicked
+                                          if (isMobile && isMobileOpen) {
+                                            onMobileToggle();
+                                          }
+                                        }}
+                                        className="w-full flex items-center px-3 py-2.5 text-left text-xs text-red-400 hover:bg-red-500/10 hover:text-red-300 focus:bg-red-500/10 focus:text-red-300 focus:outline-none transition-colors duration-200 no-white-hover"
+                                        style={{ fontFamily: 'Inter, sans-serif' }}
+                                        tabIndex={0}
+                                      >
+                                        <Trash2 className="w-3.5 h-3.5 mr-2.5 flex-shrink-0" />
+                                        <span className="truncate">Delete</span>
+                                      </button>
+                                    )}
+                                  </div>
                                 )}
                               </>
                             )}
@@ -798,14 +855,14 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
               ))
             )}
           </div>
-        </ScrollArea>
+        </div>
 
         {/* User Profile Bar */}
         <div
-          className={cn("relative p-3 border-t", isMobile && "mobile-profile-bar")}
+          className={cn("relative p-2.5 flex-shrink-0", isMobile ? "mobile-profile-bar mb-4" : "border-t")}
           style={{
             backgroundColor: '#202123',
-            borderTopColor: 'rgba(255, 255, 255, 0.1)'
+            ...(!isMobile && { borderTopColor: 'rgba(255, 255, 255, 0.1)' })
           }}
         >
           {/* Collapsed state - only avatar */}
@@ -814,14 +871,14 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
               <button
                 ref={profileButtonRef}
                 onClick={toggleProfileMenu}
-                className="no-white-hover w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-700 transition-colors duration-200"
+                className="no-white-hover w-7 h-7 rounded-full flex items-center justify-center hover:bg-gray-700 transition-colors duration-200"
                 style={{ backgroundColor: '#8B5CF6' }}
                 aria-label="Open profile menu"
                 aria-expanded={isProfileMenuOpen}
                 tabIndex={0}
                 onKeyDown={(e) => handleKeyDown(e, toggleProfileMenu)}
               >
-                <span className="text-white text-sm font-medium" style={{ fontFamily: 'Inter, sans-serif' }}>
+                <span className="text-white text-xs font-medium" style={{ fontFamily: 'Inter, sans-serif' }}>
                   {((MOCK_ENABLED && mockAuth.user) ? mockAuth.user : user)?.displayName?.charAt(0)?.toUpperCase() ||
                    ((MOCK_ENABLED && mockAuth.user) ? mockAuth.user : user)?.email?.charAt(0)?.toUpperCase() || 'U'}
                 </span>
@@ -829,8 +886,8 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
             </div>
           )}
 
-          {/* Expanded state - full profile info */}
-          {((isMobile && isMobileOpen) || (!isMobile && isSidebarOpen)) && (
+          {/* Profile info - show on mobile or when desktop sidebar is open */}
+          {(isMobile || isSidebarOpen) && (
             <div className="flex items-center justify-between">
               <button
                 ref={profileButtonRef}
@@ -842,20 +899,20 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
                 onKeyDown={(e) => handleKeyDown(e, toggleProfileMenu)}
               >
                 <div
-                  className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                  className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0"
                   style={{ backgroundColor: '#8B5CF6' }}
                 >
-                  <span className="text-white text-sm font-medium" style={{ fontFamily: 'Inter, sans-serif' }}>
+                  <span className="text-white text-xs font-medium" style={{ fontFamily: 'Inter, sans-serif' }}>
                     {((MOCK_ENABLED && mockAuth.user) ? mockAuth.user : user)?.displayName?.charAt(0)?.toUpperCase() ||
                      ((MOCK_ENABLED && mockAuth.user) ? mockAuth.user : user)?.email?.charAt(0)?.toUpperCase() || 'U'}
                   </span>
                 </div>
                 <div className="min-w-0 flex-1 text-left">
                   <p
-                    className="text-sm font-medium truncate transition-colors duration-200"
+                    className="text-xs font-medium truncate transition-colors duration-200"
                     style={{
                       color: '#FFFFFF',
-                      fontSize: '14px',
+                      fontSize: '12px',
                       fontFamily: 'Inter, sans-serif'
                     }}
                   >
@@ -866,7 +923,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
                       className="text-xs truncate transition-colors duration-200"
                       style={{
                         color: '#9CA3AF',
-                        fontSize: '12px',
+                        fontSize: '10px',
                         fontFamily: 'Inter, sans-serif',
                         lineHeight: '1.2'
                       }}
@@ -888,7 +945,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
                 background: '#343541',
                 borderRadius: '8px',
                 padding: '8px 0',
-                minWidth: '180px',
+                minWidth: '160px',
                 zIndex: 50,
                 boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
                 border: '1px solid rgba(255, 255, 255, 0.1)'
@@ -901,7 +958,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
                 className="no-white-hover w-full flex items-center px-3 py-2 text-left hover:bg-[#3A3B40] transition-colors duration-200"
                 style={{
                   color: '#FFFFFF',
-                  fontSize: '14px',
+                  fontSize: '12px',
                   fontFamily: 'Inter, sans-serif'
                 }}
                 tabIndex={0}
@@ -916,7 +973,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
                 }}
                 aria-label="Select all chats"
               >
-                <CheckSquare className="w-4 h-4 mr-3" />
+                <CheckSquare className="w-3.5 h-3.5 mr-2.5" />
                 Select All
               </button>
 
@@ -929,7 +986,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
                 className="no-white-hover w-full flex items-center px-3 py-2 text-left hover:bg-red-500/10 transition-colors duration-200"
                 style={{
                   color: '#EF4444',
-                  fontSize: '14px',
+                  fontSize: '12px',
                   fontFamily: 'Inter, sans-serif'
                 }}
                 tabIndex={0}
@@ -944,7 +1001,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
                 }}
                 aria-label="Delete account"
               >
-                <UserX className="w-4 h-4 mr-3" />
+                <UserX className="w-3.5 h-3.5 mr-2.5" />
                 Delete Account
               </button>
 
@@ -958,7 +1015,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
                 className="no-white-hover w-full flex items-center px-3 py-2 text-left hover:bg-[#3A3B40] transition-colors duration-200"
                 style={{
                   color: '#FFFFFF',
-                  fontSize: '14px',
+                  fontSize: '12px',
                   fontFamily: 'Inter, sans-serif'
                 }}
                 tabIndex={0}
@@ -974,7 +1031,7 @@ export const ChatSidebar: React.FC<ChatSidebarProps> = ({
                 }}
                 aria-label="Sign out"
               >
-                <LogOut className="w-4 h-4 mr-3" />
+                <LogOut className="w-3.5 h-3.5 mr-2.5" />
                 Sign Out
               </button>
             </div>

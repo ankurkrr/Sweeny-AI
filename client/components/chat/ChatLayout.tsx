@@ -64,6 +64,7 @@ export const ChatLayout: React.FC = () => {
           onSidebarToggle={toggleSidebar}
           isSidebarOpen={isSidebarOpen}
           isMobile={isMobile}
+          isMobileSidebarOpen={isMobileSidebarOpen}
           isKeyboardOpen={isKeyboardOpen}
           closeKeyboard={closeKeyboard}
           forceCloseKeyboard={forceCloseKeyboard}
